@@ -27,6 +27,8 @@ async function run() {
 
     const database = client.db("tikidocsDB");
     const userCollection = database.collection("users");
+    const postsCollection = database.collection("posts");
+    const announcementCollection = database.collection("announcements");
 
     // users collection api
     app.post("/api/v1/users", async (req, res) => {
@@ -72,14 +74,31 @@ async function run() {
 
     // checking admin role
     app.get("/api/v1/users/admin", async(req, res) => {
-      const email = req.query.email;
-      const query = {email: email};
+      let query = {};
+      if (req.query?.email) {
+        query = { email: req.query?.email };
+      }
       const user = await userCollection.findOne(query);
       let admin = false;
       if(user){
         admin = user?.role ==='admin';
       }
       res.send({admin});
+    })
+
+    // user posts api
+
+    app.post("/api/v1/posts", async(req, res) => {
+      const post = req.body;
+      const result = await postsCollection.insertOne(post);
+      res.send({result});
+    })
+
+    // admin post announcements
+    app.post("/api/v1/announcement", async(req, res) => {
+      const announcement = req.body;
+      const result = await announcementCollection.insertOne(announcement);
+      res.send({result});
     })
 
     // Send a ping to confirm a successful connection
