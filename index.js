@@ -88,6 +88,23 @@ async function run() {
 
     // user posts api
 
+    app.get("/api/v1/posts", async(req,res) => {
+      let query = {};
+      if (req.query?.email) {
+        query = { authorEmail: req.query?.email };
+      }
+      const cursor = postsCollection.find(query);
+      const result = await cursor.toArray();
+      res.send({result});
+    })
+
+    app.get("/api/v1/posts/:id", async(req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await postsCollection.findOne(query);
+      res.send({result});
+    })
+
     app.post("/api/v1/posts", async(req, res) => {
       const post = req.body;
       const result = await postsCollection.insertOne(post);
