@@ -70,6 +70,18 @@ async function run() {
       res.send(result);
     })
 
+    // checking admin role
+    app.get("/api/v1/users/admin", async(req, res) => {
+      const email = req.query.email;
+      const query = {email: email};
+      const user = await userCollection.findOne(query);
+      let admin = false;
+      if(user){
+        admin = user?.role ==='admin';
+      }
+      res.send({admin});
+    })
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
