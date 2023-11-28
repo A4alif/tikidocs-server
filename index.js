@@ -1,15 +1,14 @@
-const express = require('express');
+const express = require("express");
 const app = express();
 const cors = require("cors");
-require('dotenv').config()
+require("dotenv").config();
 const port = process.env.PORT || 5000;
 
 // middleware
 app.use(cors());
 app.use(express.json());
 
-
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@ph-8.7tjeuwe.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -18,7 +17,7 @@ const client = new MongoClient(uri, {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 });
 
 async function run() {
@@ -28,20 +27,54 @@ async function run() {
 
     const database = client.db("tikidocsDB");
     const userCollection = database.collection("users");
-    
+
     // users collection api
-    app.post("/api/v1/users", async(req, res) => {
+    app.post("/api/v1/users", async (req, res) => {
       const user = req.body;
+      // check user email already existis or not
+      const query = { email: user.email };
+      const existingUser = await userCollection.findOne(query);
+      if (existingUser) {
+        return res.send({ message: "user already exists", insertedId: null });
+      }
       const result = await userCollection.insertOne(user);
-      res.send({result});
-    })
+      res.send({ result });
+    });
     
+    // get all users
 
+    app.get("/api/v1/users", async (req, res) => {
+      let query = {};
+      if (req.query?.email) {
+        query = { email: req.query?.email };
+      }
+      const cursor = userCollection.find(query);
+      const result = await cursor.toArray();
+      res.send({ result });
+    });
 
+    // make admin api
+    app.put("/api/v1/users/admin/:id", async(req, res) => {
+      const id = req.params.id;
+      const userInfo = req.body;
+      const filter = { _id: new ObjectId(id)};
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          status: userInfo.status,
+          statusPhotoUrl: userInfo.statusPhotoUrl,
+          role: userInfo.role
+        },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
@@ -49,11 +82,10 @@ async function run() {
 }
 run().catch(console.dir);
 
-
 app.get("/", (req, res) => {
-    res.send("TikiDocs Server is running successfully");
-})
+  res.send("TikiDocs Server is running successfully");
+});
 
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-})
+  console.log(`Server is running on port ${port}`);
+});
