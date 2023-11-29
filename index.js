@@ -29,6 +29,7 @@ async function run() {
     const userCollection = database.collection("users");
     const postsCollection = database.collection("posts");
     const announcementCollection = database.collection("announcements");
+    const commentsCollection = database.collection("comments");
 
     // users collection api
     app.post("/api/v1/users", async (req, res) => {
@@ -86,7 +87,7 @@ async function run() {
       res.send({admin});
     })
 
-    // user posts api
+    // user all posts api
 
     app.get("/api/v1/posts", async(req,res) => {
       let query = {};
@@ -122,6 +123,14 @@ async function run() {
     app.post("/api/v1/announcement", async(req, res) => {
       const announcement = req.body;
       const result = await announcementCollection.insertOne(announcement);
+      res.send({result});
+    })
+
+    // user post comments api
+
+    app.post("/api/v1/user-comment", async(req, res) => {
+      const comment = req.body;
+      const result = await commentsCollection.insertOne(comment);
       res.send({result});
     })
 
