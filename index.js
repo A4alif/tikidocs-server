@@ -128,6 +128,17 @@ async function run() {
 
     // user post comments api
 
+    app.get("/api/v1/user-comments/:id", async(req, res) => {
+      
+      let query = {}
+      if(req.params?.id){
+        query = { postID: req.params?.id };
+      }
+      const cursor = commentsCollection.find(query);
+      const result = await cursor.toArray();
+      res.send({result});
+    })
+
     app.post("/api/v1/user-comment", async(req, res) => {
       const comment = req.body;
       const result = await commentsCollection.insertOne(comment);
