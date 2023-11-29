@@ -93,7 +93,7 @@ async function run() {
       if (req.query?.email) {
         query = { authorEmail: req.query?.email };
       }
-      const cursor = postsCollection.find(query);
+      const cursor = postsCollection.find(query).sort({postDate : -1 });
       const result = await cursor.toArray();
       res.send({result});
     })
@@ -112,6 +112,13 @@ async function run() {
     })
 
     // admin post announcements
+
+    app.get("/api/v1/announcements", async(req, res) => {
+      const cursor = announcementCollection.find().sort({postDate : -1 });
+      const result = await cursor.toArray();
+      res.send({result});
+    })
+
     app.post("/api/v1/announcement", async(req, res) => {
       const announcement = req.body;
       const result = await announcementCollection.insertOne(announcement);
