@@ -31,6 +31,9 @@ async function run() {
     const announcementCollection = database.collection("announcements");
     const commentsCollection = database.collection("comments");
     const reportCommentsCollection = database.collection("reportComments");
+    const tagsCollection = database.collection("tagsCollection");
+    const membershipCollection = database.collection("membership");
+
 
     // users collection api
     app.post("/api/v1/users", async (req, res) => {
@@ -151,13 +154,35 @@ async function run() {
     app.get("/api/v1/report-comments", async(req, res) => {
       const cursor = reportCommentsCollection.find();
       const result = await cursor.toArray();
-      res.send(result);
+      res.send({result});
     })
 
     app.post("/api/v1/report-comment", async(req, res) => {
       const comment = req.body;
       console.log(comment);
       const result = await reportCommentsCollection.insertOne(comment);
+      res.send({result});
+    })
+
+    // tags api
+
+    app.post("/api/v1/tags", async(req, res) => {
+      const tag = req.body;
+      const result = await tagsCollection.insertOne(tag);
+      res.send({result});
+    })
+
+    // membership api
+
+   app.get("/api/v1/membership", async(req, res) => {
+    const cursor = membershipCollection.find();
+    const result = await cursor.toArray();
+    res.send({result});
+   })
+
+    app.post("/api/v1/membership", async(req, res) => {
+      const membership = req.body;
+      const result = await membershipCollection.insertOne(membership);
       res.send({result});
     })
 
