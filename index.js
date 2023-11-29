@@ -33,6 +33,7 @@ async function run() {
     const reportCommentsCollection = database.collection("reportComments");
     const tagsCollection = database.collection("tagsCollection");
     const membershipCollection = database.collection("membership");
+    const mycartCollection = database.collection("mycart");
 
 
     // users collection api
@@ -184,6 +185,14 @@ async function run() {
       const membership = req.body;
       const result = await membershipCollection.insertOne(membership);
       res.send({result});
+    })
+
+    // my cart collection packages added to this cart
+
+    app.post("/api/v1/cart", async(req, res) => {
+      const cart = req.body;
+      const result = await mycartCollection.insertOne(cart);
+      res.send({result})
     })
 
     // Send a ping to confirm a successful connection
