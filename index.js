@@ -35,7 +35,6 @@ async function run() {
     const membershipCollection = database.collection("membership");
     const mycartCollection = database.collection("mycart");
 
-
     // users collection api
     app.post("/api/v1/users", async (req, res) => {
       const user = req.body;
@@ -48,7 +47,7 @@ async function run() {
       const result = await userCollection.insertOne(user);
       res.send({ result });
     });
-    
+
     // get all users
 
     app.get("/api/v1/users", async (req, res) => {
@@ -62,138 +61,154 @@ async function run() {
     });
 
     // make admin api
-    app.put("/api/v1/users/admin/:id", async(req, res) => {
+    app.put("/api/v1/users/admin/:id", async (req, res) => {
       const id = req.params.id;
       const userInfo = req.body;
-      const filter = { _id: new ObjectId(id)};
+      const filter = { _id: new ObjectId(id) };
       const options = { upsert: true };
       const updateDoc = {
         $set: {
           status: userInfo.status,
           statusPhotoUrl: userInfo.statusPhotoUrl,
-          role: userInfo.role
+          role: userInfo.role,
         },
       };
       const result = await userCollection.updateOne(filter, updateDoc, options);
       res.send(result);
-    })
+    });
 
     // checking admin role
-    app.get("/api/v1/users/admin", async(req, res) => {
+    app.get("/api/v1/users/admin", async (req, res) => {
       let query = {};
       if (req.query?.email) {
         query = { email: req.query?.email };
       }
       const user = await userCollection.findOne(query);
       let admin = false;
-      if(user){
-        admin = user?.role ==='admin';
+      if (user) {
+        admin = user?.role === "admin";
       }
-      res.send({admin});
-    })
+      res.send({ admin });
+    });
 
     // user all posts api
 
-    app.get("/api/v1/posts", async(req,res) => {
+    app.get("/api/v1/posts", async (req, res) => {
       let query = {};
       if (req.query?.email) {
         query = { authorEmail: req.query?.email };
       }
-      const cursor = postsCollection.find(query).sort({postDate : -1 });
+      const cursor = postsCollection.find(query).sort({ postDate: -1 });
       const result = await cursor.toArray();
-      res.send({result});
-    })
+      res.send({ result });
+    });
 
-    app.get("/api/v1/posts/:id", async(req, res) => {
+    app.get("/api/v1/posts/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await postsCollection.findOne(query);
-      res.send({result});
-    })
+      res.send({ result });
+    });
 
-    app.post("/api/v1/posts", async(req, res) => {
+    app.post("/api/v1/posts", async (req, res) => {
       const post = req.body;
       const result = await postsCollection.insertOne(post);
-      res.send({result});
-    })
+      res.send({ result });
+    });
 
     // admin post announcements
 
-    app.get("/api/v1/announcements", async(req, res) => {
-      const cursor = announcementCollection.find().sort({postDate : -1 });
+    app.get("/api/v1/announcements", async (req, res) => {
+      const cursor = announcementCollection.find().sort({ postDate: -1 });
       const result = await cursor.toArray();
-      res.send({result});
-    })
+      res.send({ result });
+    });
 
-    app.post("/api/v1/announcement", async(req, res) => {
+    app.post("/api/v1/announcement", async (req, res) => {
       const announcement = req.body;
       const result = await announcementCollection.insertOne(announcement);
-      res.send({result});
-    })
+      res.send({ result });
+    });
 
     // user post comments api
 
-    app.get("/api/v1/user-comments/:id", async(req, res) => {
-      
-      let query = {}
-      if(req.params?.id){
+    app.get("/api/v1/user-comments/:id", async (req, res) => {
+      let query = {};
+      if (req.params?.id) {
         query = { postID: req.params?.id };
       }
       const cursor = commentsCollection.find(query);
       const result = await cursor.toArray();
-      res.send({result});
-    })
+      res.send({ result });
+    });
 
-    app.post("/api/v1/user-comment", async(req, res) => {
+    app.post("/api/v1/user-comment", async (req, res) => {
       const comment = req.body;
       const result = await commentsCollection.insertOne(comment);
-      res.send({result});
-    })
+      res.send({ result });
+    });
 
     // reported comments api
 
-    app.get("/api/v1/report-comments", async(req, res) => {
+    app.get("/api/v1/report-comments", async (req, res) => {
       const cursor = reportCommentsCollection.find();
       const result = await cursor.toArray();
-      res.send({result});
-    })
+      res.send({ result });
+    });
 
-    app.post("/api/v1/report-comment", async(req, res) => {
+    app.post("/api/v1/report-comment", async (req, res) => {
       const comment = req.body;
       console.log(comment);
       const result = await reportCommentsCollection.insertOne(comment);
-      res.send({result});
-    })
+      res.send({ result });
+    });
 
     // tags api
 
-    app.post("/api/v1/tags", async(req, res) => {
+    app.post("/api/v1/tags", async (req, res) => {
       const tag = req.body;
       const result = await tagsCollection.insertOne(tag);
-      res.send({result});
-    })
+      res.send({ result });
+    });
 
     // membership api
 
-   app.get("/api/v1/membership", async(req, res) => {
-    const cursor = membershipCollection.find();
-    const result = await cursor.toArray();
-    res.send({result});
-   })
+    app.get("/api/v1/membership", async (req, res) => {
+      const cursor = membershipCollection.find();
+      const result = await cursor.toArray();
+      res.send({ result });
+    });
 
-    app.post("/api/v1/membership", async(req, res) => {
+    app.post("/api/v1/membership", async (req, res) => {
       const membership = req.body;
       const result = await membershipCollection.insertOne(membership);
-      res.send({result});
-    })
+      res.send({ result });
+    });
 
     // my cart collection packages added to this cart
 
-    app.post("/api/v1/cart", async(req, res) => {
+    app.get("/api/v1/cart", async (req, res) => {
+      let query = {};
+      if (req.query?.email) {
+        query = { email: req.query?.email };
+      }
+      const cursor = mycartCollection.find(query);
+      const result = await cursor.toArray();
+      res.send({ result });
+    });
+
+    app.post("/api/v1/cart", async (req, res) => {
       const cart = req.body;
       const result = await mycartCollection.insertOne(cart);
-      res.send({result})
-    })
+      res.send({ result });
+    });
+
+    app.delete("/api/v1/cart/:id", async (req, res) => {
+      const id = req.params?.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await mycartCollection.deleteOne(query);
+      res.send({ result });
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
