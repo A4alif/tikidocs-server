@@ -98,9 +98,18 @@ async function run() {
       if (req.query?.email) {
         query = { authorEmail: req.query?.email };
       }
-      const cursor = postsCollection.find(query).sort({ postDate: -1 });
+
+      // pagination
+      const page = Number(req.query?.page);
+      const limit = Number(req.query?.limit);
+      const skip = (page-1)*limit;
+
+      const cursor = postsCollection.find(query).skip(skip).limit(limit).sort({ postDate: -1 });
       const result = await cursor.toArray();
-      res.send({ result });
+
+      // count data
+      const total = await postsCollection.countDocuments();
+      res.send({total, result });
     });
 
     app.get("/api/v1/posts/:id", async (req, res) => {
@@ -130,7 +139,13 @@ async function run() {
       res.send({ result });
     });
 
-    // user post comments api
+    // user  comments api
+
+    app.get("/api/v1/user-comment", async (req, res) => {
+      const cursor = commentsCollection.find();
+      const result = await cursor.toArray();
+      res.send({ result });
+    });
 
     app.get("/api/v1/user-comments/:id", async (req, res) => {
       let query = {};
