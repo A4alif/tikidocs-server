@@ -51,9 +51,16 @@ async function run() {
     // get all users
 
     app.get("/api/v1/users", async (req, res) => {
+      const filter = req.query;
+
       let query = {};
       if (req.query?.email) {
         query = { email: req.query?.email };
+      }
+
+      // search
+      if (filter.search) {
+        query.name = { $regex: filter.search, $options: "i" };
       }
 
       // pagination
