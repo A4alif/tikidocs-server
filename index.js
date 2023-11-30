@@ -55,9 +55,17 @@ async function run() {
       if (req.query?.email) {
         query = { email: req.query?.email };
       }
-      const cursor = userCollection.find(query);
+
+      // pagination
+      const page = Number(req.query?.page);
+      const limit = Number(req.query?.limit);
+      const skip = (page - 1) * limit;
+
+      const cursor = userCollection.find(query).skip(skip).limit(limit);
       const result = await cursor.toArray();
-      res.send({ result });
+      // count data
+      const total = await userCollection.countDocuments();
+      res.send({ total, result });
     });
 
     // make admin api
@@ -102,14 +110,18 @@ async function run() {
       // pagination
       const page = Number(req.query?.page);
       const limit = Number(req.query?.limit);
-      const skip = (page-1)*limit;
+      const skip = (page - 1) * limit;
 
-      const cursor = postsCollection.find(query).skip(skip).limit(limit).sort({ postDate: -1 });
+      const cursor = postsCollection
+        .find(query)
+        .skip(skip)
+        .limit(limit)
+        .sort({ postDate: -1 });
       const result = await cursor.toArray();
 
       // count data
       const total = await postsCollection.countDocuments();
-      res.send({total, result });
+      res.send({ total, result });
     });
 
     app.get("/api/v1/posts/:id", async (req, res) => {
@@ -122,6 +134,24 @@ async function run() {
     app.post("/api/v1/posts", async (req, res) => {
       const post = req.body;
       const result = await postsCollection.insertOne(post);
+      res.send({ result });
+    });
+
+    app.put("/api/v1/posts/:id", async (req, res) => {
+      const id = req.params.id;
+      const post = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          upVote: post.upVote,
+        },
+      };
+      const result = await postsCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
       res.send({ result });
     });
 
